@@ -2,14 +2,20 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/png"
+	"log"
 	"os"
+	"strings"
 
 	// "strconv"
 	"io"
 	"net/http"
+
 	// "net/url"
 
 	"github.com/google/uuid"
+	"github.com/nfnt/resize"
 )
 
 func handle(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +32,42 @@ func download(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "res/"+filename)
 }
 
+func resizeImage(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	filename := query.Get("name")
+	aspectRatio := query.Get("aspect")
+	name := strings.Split(filename, ".")
+
+	file, err := os.Open("res/" + filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	img, err := png.Decode(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var m image.Image
+	if aspectRatio != "" {
+
+		m = resize.Thumbnail(100, 100, img, resize.Bilinear)
+	} else {
+		m = resize.Resize(200, 100, img, resize.Bilinear)
+
+	}
+
+	out, err := os.Create("res/" + name[0] + "SIZE.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer out.Close()
+
+	png.Encode(out, m)
+
+}
+
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("File Upload Endpoint Hit")
 
@@ -35,7 +77,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// FormFile returns the first file for the given key `myFile`
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
-	file, handler, err := r.FormFile("myFile")
+	file, handler, err := r.FormFile("file")
 	if err != nil {
 		fmt.Println("Error Retrieving the File")
 		fmt.Println(err)
@@ -74,6 +116,7 @@ func main() {
 	http.HandleFunc("/", handle)
 	http.HandleFunc("/download", download)
 	http.HandleFunc("/upload", uploadFile)
+	http.HandleFunc("/resize", resizeImage)
 
 	http.ListenAndServe(":80", nil)
 }
