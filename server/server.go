@@ -111,12 +111,23 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "name %s\n", name)
 }
 
+func deleteFile(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	filename := query.Get("name")
+
+	err := os.Remove("res/" + filename)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func main() {
 	fmt.Println("hello")
 	http.HandleFunc("/", handle)
 	http.HandleFunc("/download", download)
 	http.HandleFunc("/upload", uploadFile)
 	http.HandleFunc("/resize", resizeImage)
+	http.HandleFunc("/delete", deleteFile)
 
 	http.ListenAndServe(":80", nil)
 }
