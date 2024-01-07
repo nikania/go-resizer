@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	// "strconv"
 	"io"
@@ -92,6 +93,13 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// a particular naming pattern
 	id := uuid.New()
 	name := fmt.Sprintf("img-%v.png", id)
+	if _, err := os.Stat("res"); os.IsNotExist(err) {
+
+		err = os.Mkdir("res", os.ModeDir)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 	tempFile, err := os.Create("res/" + name)
 	if err != nil {
 		fmt.Println(err)
@@ -121,8 +129,31 @@ func deleteFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func deleteLoop() {
+	fmt.Println("entering dlete loop")
+	for {
+		fmt.Println("entering dlete loop: for")
+
+		time.Sleep(time.Hour * 8)
+		dir, err := os.ReadDir("res/")
+		if err != nil {
+			fmt.Println(err)
+		}
+		for i := 0; i < len(dir); i++ {
+			fmt.Println(dir[i].Name())
+			err := os.RemoveAll("res/" + dir[i].Name())
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+		fmt.Println("deleted files")
+	}
+}
+
 func main() {
 	fmt.Println("hello")
+	go deleteLoop()
+
 	http.HandleFunc("/", handle)
 	http.HandleFunc("/download", download)
 	http.HandleFunc("/upload", uploadFile)
@@ -130,4 +161,5 @@ func main() {
 	http.HandleFunc("/delete", deleteFile)
 
 	http.ListenAndServe(":80", nil)
+
 }
