@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/nfnt/resize"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -12,13 +10,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/nfnt/resize"
 )
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "hello, you're requested %s\n", r.URL.Path)
-
 }
 
 func download(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +34,15 @@ func download(w http.ResponseWriter, r *http.Request) {
 func resizeImage(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	filename := query.Get("name")
-	aspectRatio := query.Get("aspect")
+	width, err := strconv.ParseUint(query.Get("width"), 10, 32)
+	if err != nil {
+		log.Fatal(err)
+	}
+	height, err := strconv.ParseUint(query.Get("height"), 10, 32)
+	if err != nil {
+		log.Fatal(err)
+	}
+	saveRatio := query.Get("save_ratio")
 	name := strings.Split(filename, ".")
 
 	file, err := os.Open("res/" + filename)
@@ -42,27 +51,34 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	img, err := png.Decode(file)
+	img, format, err := image.Decode(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var m image.Image
-	if aspectRatio != "" {
-
-		m = resize.Thumbnail(100, 100, img, resize.Bilinear)
+	if saveRatio != "" {
+		m = resize.Thumbnail(uint(width), uint(height), img, resize.Bilinear)
 	} else {
-		m = resize.Resize(200, 100, img, resize.Bilinear)
-
+		m = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
 	}
 
-	out, err := os.Create("res/" + name[0] + "SIZE.png")
+	out, err := os.Create("res/" + name[0] + "resized." + format)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer out.Close()
 
-	png.Encode(out, m)
+	switch format {
+	case "png":
+		png.Encode(out, m)
+	case "jpeg":
+		jpeg.Encode(out, m, nil)
+	case "gif":
+		gif.Encode(out, m, nil)
+	default:
+		png.Encode(out, m)
+	}
 
 }
 
@@ -85,11 +101,32 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
 	fmt.Printf("File Size: %+v\n", handler.Size)
 	fmt.Printf("MIME Header: %+v\n", handler.Header)
+	fmt.Printf("MIME Header: %+v\n", handler.Header["Content-Type"])
+	format := handler.Header["Content-Type"][0]
+
+	allowed := []string{"image/jpeg", "image/png", "image/gif", "application/pdf"}
+	if !Contains(allowed, format) {
+		log.Print("not allowed")
+		return
+	}
 
 	// Create a temporary file within our temp-images directory that follows
 	// a particular naming pattern
 	id := uuid.New()
-	name := fmt.Sprintf("img-%v.png", id)
+	var name string
+	switch format {
+	case "image/jpeg":
+		name = fmt.Sprintf("img-%v.jpeg", id)
+	case "image/png":
+		name = fmt.Sprintf("img-%v.png", id)
+	case "image/gif":
+		name = fmt.Sprintf("img-%v.gif", id)
+	case "application/pdf":
+		name = fmt.Sprintf("%v.pdf", id)
+	default:
+		name = fmt.Sprintf("%v", id)
+	}
+
 	if _, err := os.Stat("res"); os.IsNotExist(err) {
 
 		err = os.Mkdir("res", os.ModeDir)
