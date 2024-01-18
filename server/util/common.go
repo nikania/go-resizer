@@ -1,4 +1,4 @@
-package main
+package util
 
 func Contains[T comparable](arr []T, t T) bool {
 	for _, el := range arr {
