@@ -1,4 +1,3 @@
-import { Button } from "antd";
 import React from "react";
 
 // react component for uploading files on server
@@ -7,11 +6,7 @@ const UploadFile = () => {
     throw new Error("Function not implemented.");
   }
 
-  return (
-    <Button onClick={handleUpload} type="primary">
-      Upload file
-    </Button>
-  );
+  return <div></div>;
 };
 
 export default UploadFile;

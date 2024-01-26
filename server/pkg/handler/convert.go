@@ -15,6 +15,7 @@ import (
 
 // can decode many formats (not so many) but only to allowed ones
 func convertImage(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w, r)
 	query := r.URL.Query()
 	filename := query.Get("name")
 	convertTo := query.Get("to")

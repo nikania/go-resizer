@@ -16,6 +16,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func download(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w, r)
 	query := r.URL.Query()
 	filename := query.Get("name")
 	// w.Header().Set("Content-Disposition", "attachment; filename="+strconv.Quote(filename))
@@ -26,6 +27,7 @@ func download(w http.ResponseWriter, r *http.Request) {
 
 
 func uploadFile(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w, r)
 	fmt.Println("File Upload Endpoint Hit")
 
 	// Parse our multipart form, 10 << 20 specifies a maximum

@@ -16,6 +16,7 @@ import (
 
 
 func resizeImage(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w, r)
 	query := r.URL.Query()
 	filename := query.Get("name")
 	width, err := strconv.ParseUint(query.Get("width"), 10, 32)

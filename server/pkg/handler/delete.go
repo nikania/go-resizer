@@ -9,6 +9,7 @@ import (
 
 
 func deleteFile(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w, r)
 	query := r.URL.Query()
 	filename := query.Get("name")
 
