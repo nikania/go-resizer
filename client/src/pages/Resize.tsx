@@ -1,13 +1,18 @@
 import { Button, Heading } from "@chakra-ui/react";
-import DownloadFile from "../components/Download";
 import PageLayout from "../layouts/PageLayout";
+import { useState } from "react";
 
 export default function Resize() {
-  function handleResize(
-    event: MouseEvent<HTMLButtonElement, MouseEvent>,
-  ): void {
+  const [name, setName] = useState("");
+  const [width, setWidth] = useState(100);
+  const [height, setHeight] = useState(100);
+
+  console.log(name, width, height);
+
+  function handleResize(event): void {
+    event.preventDefault();
     fetch(
-      "http://localhost:8080/resize?name=img-3ecd19d4-0240-4bac-b6b7-c56c34547018.jpeg&width=100&height=500",
+      `http://localhost:8080/resize?name=${name}&width=${width}&height=${height}`,
     )
       .then((resp) => resp.json())
       .then((data) => console.log(data))
@@ -16,7 +21,34 @@ export default function Resize() {
   return (
     <PageLayout>
       <Heading>Resize image</Heading>
-      <Button onClick={handleResize}>Resize</Button>
+      <form onSubmit={handleResize}>
+        <label>
+          <span>FileName:</span>
+          <input
+            type="text"
+            onChange={(e) => setName(e.target.value)}
+            value={name}
+          />
+        </label>
+        <label>
+          <span>width:</span>
+          <input
+            type="number"
+            onChange={(e) => setWidth(Number(e.target.value))}
+            value={width}
+          />
+        </label>
+        <label>
+          <span>height:</span>
+          <input
+            type="number"
+            onChange={(e) => setHeight(Number(e.target.value))}
+            value={height}
+          />
+        </label>
+        <Button type="submit">Resize</Button>
+      </form>
+      {/* <Button onClick={handleResize}>Resize</Button> */}
     </PageLayout>
   );
 }

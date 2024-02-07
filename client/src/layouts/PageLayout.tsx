@@ -1,6 +1,6 @@
 // page layout with common elements for every page
 
-import { PropsWithChildren } from "react";
+import React, { PropsWithChildren } from "react";
 import DownloadFile from "../components/Download";
 import {
   Box,
@@ -11,6 +11,9 @@ import {
   Text,
 } from "@chakra-ui/react";
 
+// type PageLayoutProps = { form: React.ReactNode | undefined };
+
+// const PageLayout = (props: PropsWithChildren<PageLayoutProps>) => {
 const PageLayout = (props: PropsWithChildren) => {
   return (
     <>
