@@ -16,6 +16,7 @@ func deleteFile(w http.ResponseWriter, r *http.Request) {
 	err := os.Remove("res/" + filename)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 }
 

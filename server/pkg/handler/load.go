@@ -77,11 +77,13 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		err = os.Mkdir("res", os.ModeDir)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
 	}
 	tempFile, err := os.Create("res/" + name)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	defer tempFile.Close()
 
@@ -90,10 +92,10 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	// write this byte array to our temporary file
 	tempFile.Write(fileBytes)
-	// return that we have successfully uploaded our file!
-	fmt.Fprintf(w, "Successfully Uploaded File\n")
-	fmt.Fprintf(w, "name %s\n", name)
+	// return file name in json format
+	fmt.Fprintf(w, "{\"name\": \"%s\"}", name)
 }

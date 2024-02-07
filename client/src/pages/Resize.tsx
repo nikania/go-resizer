@@ -1,9 +1,10 @@
 import { Button, Heading } from "@chakra-ui/react";
 import PageLayout from "../layouts/PageLayout";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { FileContext, FileProvider } from "../context/FileContext";
 
 export default function Resize() {
-  const [name, setName] = useState("");
+  const { name } = useContext(FileContext);
   const [width, setWidth] = useState(100);
   const [height, setHeight] = useState(100);
 
@@ -19,36 +20,30 @@ export default function Resize() {
       .catch((err) => console.log(err));
   }
   return (
-    <PageLayout>
-      <Heading>Resize image</Heading>
-      <form onSubmit={handleResize}>
-        <label>
-          <span>FileName:</span>
-          <input
-            type="text"
-            onChange={(e) => setName(e.target.value)}
-            value={name}
-          />
-        </label>
-        <label>
-          <span>width:</span>
-          <input
-            type="number"
-            onChange={(e) => setWidth(Number(e.target.value))}
-            value={width}
-          />
-        </label>
-        <label>
-          <span>height:</span>
-          <input
-            type="number"
-            onChange={(e) => setHeight(Number(e.target.value))}
-            value={height}
-          />
-        </label>
-        <Button type="submit">Resize</Button>
-      </form>
-      {/* <Button onClick={handleResize}>Resize</Button> */}
-    </PageLayout>
+    <FileProvider>
+      <PageLayout>
+        <Heading>Resize image</Heading>
+        <form onSubmit={handleResize}>
+          <label>
+            <span>width:</span>
+            <input
+              type="number"
+              onChange={(e) => setWidth(Number(e.target.value))}
+              value={width}
+            />
+          </label>
+          <label>
+            <span>height:</span>
+            <input
+              type="number"
+              onChange={(e) => setHeight(Number(e.target.value))}
+              value={height}
+            />
+          </label>
+          <Button type="submit">Resize</Button>
+        </form>
+        {/* <Button onClick={handleResize}>Resize</Button> */}
+      </PageLayout>
+    </FileProvider>
   );
 }

@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"image"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -19,26 +19,31 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w, r)
 	query := r.URL.Query()
 	filename := query.Get("name")
+
 	width, err := strconv.ParseUint(query.Get("width"), 10, 32)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
 	height, err := strconv.ParseUint(query.Get("height"), 10, 32)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
 	saveRatio := query.Get("save_ratio")
 	name := strings.Split(filename, ".")
 
 	file, err := os.Open("res/" + filename)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
 	defer file.Close()
 
 	img, format, err := image.Decode(file)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
 
 	var m image.Image
@@ -50,7 +55,8 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 
 	out, err := os.Create("res/" + name[0] + "resized." + format)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
 	defer out.Close()
 
