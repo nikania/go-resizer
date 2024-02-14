@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 )
 
@@ -13,7 +12,7 @@ type Configuration struct {
 func ReadConfiguration() (*Configuration, error) {
 	file, err := os.Open("../config/conf.json")
 	if err != nil {
-		log.Printf("error reading config %s", err.Error())
+		locallog.Error("error reading config %s", err.Error())
 		return nil, err
 	}
 
@@ -22,7 +21,7 @@ func ReadConfiguration() (*Configuration, error) {
 	configuration := Configuration{}
 	err = decoder.Decode(&configuration)
 	if err != nil {
-		log.Printf("error reading config %s", err.Error())
+		locallog.Error("error reading config %s", err.Error())
 		return nil, err
 	}
 

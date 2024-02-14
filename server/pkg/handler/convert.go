@@ -24,13 +24,13 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 
 	allowed := []string{"image/png", "image/jpeg", "image/gif"}
 	if !util.Contains(allowed, convertTo) {
-		fmt.Println("Unsupported type to convert to")
+		Locallog.Error("Unsupported type to convert to")
 		return
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 	defer file.Close()
@@ -51,7 +51,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		convName = "res/" + name[0] + "conv.png"
 		out, err := os.Create(convName)
 		if err != nil {
-			fmt.Println(err)
+			Locallog.Error(err)
 			return
 		}
 		defer out.Close()
@@ -61,7 +61,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		convName = "res/" + name[0] + "conv.jpeg"
 		out, err := os.Create(convName)
 		if err != nil {
-			fmt.Println(err)
+			Locallog.Error(err)
 			return
 		}
 		defer out.Close()
@@ -71,7 +71,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		convName = "res/" + name[0] + "conv.gif"
 		out, err := os.Create(convName)
 		if err != nil {
-			fmt.Println(err)
+			Locallog.Error(err)
 			return
 		}
 		defer out.Close()

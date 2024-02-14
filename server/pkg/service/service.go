@@ -1,16 +1,19 @@
 package service
 
-import "server/pkg/repository"
+import (
+	"server/logger"
+	"server/pkg/repository"
+)
+
+var Locallog logger.Logger
 
 type Authorization interface {
-
 }
 
 type Images interface {
-
 }
 
-type Documents interface {}
+type Documents interface{}
 
 type Service struct {
 	Authorization

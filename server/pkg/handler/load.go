@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"server/util"
@@ -25,10 +24,9 @@ func download(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "res/"+filename)
 }
 
-
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w, r)
-	fmt.Println("File Upload Endpoint Hit")
+	Locallog.Info("File Upload Endpoint Hit")
 
 	// Parse our multipart form, 10 << 20 specifies a maximum
 	// upload of 10 MB files.
@@ -38,20 +36,20 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// the Header and the size of the file
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		fmt.Println(err)
+		Locallog.Error("Error Retrieving the File", err)
 		return
 	}
 	defer file.Close()
-	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-	fmt.Printf("File Size: %+v\n", handler.Size)
-	fmt.Printf("MIME Header: %+v\n", handler.Header)
-	fmt.Printf("MIME Header: %+v\n", handler.Header["Content-Type"])
+	Locallog.Info("Uploaded File: ", handler.Filename)
+	Locallog.Info("File Size: ", handler.Size)
+	Locallog.Info("MIME Header: ", handler.Header)
+	Locallog.Info("MIME Header: ", handler.Header["Content-Type"])
 	format := handler.Header["Content-Type"][0]
 
 	allowed := []string{"image/jpeg", "image/png", "image/gif", "application/pdf"}
 	if !util.Contains(allowed, format) {
-		log.Print("not allowed")
+		// not allowed
+		w.WriteHeader(405)
 		return
 	}
 
@@ -76,13 +74,13 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 		err = os.Mkdir("res", os.ModeDir)
 		if err != nil {
-			fmt.Println(err)
+			Locallog.Error(err)
 			return
 		}
 	}
 	tempFile, err := os.Create("res/" + name)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 	defer tempFile.Close()
@@ -91,7 +89,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// byte array
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 	// write this byte array to our temporary file

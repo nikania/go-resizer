@@ -1,16 +1,23 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"server"
+	"server/logger"
 	"server/pkg/handler"
 	"server/pkg/repository"
 	"server/pkg/service"
 )
 
+var locallog logger.Logger
+
+func init() {
+	locallog = logger.NewConsoleLogger(true, true)
+	handler.Locallog = locallog
+	repository.Locallog = locallog
+	service.Locallog = locallog
+}
+
 func main() {
-	fmt.Println("hello")
 	conf, _ := ReadConfiguration()
 
 	repos := repository.NewRepository()
@@ -19,6 +26,6 @@ func main() {
 
 	server := new(server.Server)
 	if err := server.Run(conf.Port, *handler); err != nil {
-		log.Fatalf("error occured %s", err.Error())
+		locallog.Error("Error running server", err)
 	}
 }

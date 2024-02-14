@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -14,7 +13,6 @@ import (
 	"github.com/nfnt/resize"
 )
 
-
 func resizeImage(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w, r)
 	query := r.URL.Query()
@@ -22,12 +20,12 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 
 	width, err := strconv.ParseUint(query.Get("width"), 10, 32)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 	height, err := strconv.ParseUint(query.Get("height"), 10, 32)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 	saveRatio := query.Get("save_ratio")
@@ -35,14 +33,14 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 
 	file, err := os.Open("res/" + filename)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 	defer file.Close()
 
 	img, format, err := image.Decode(file)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 
@@ -55,7 +53,7 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 
 	out, err := os.Create("res/" + name[0] + "resized." + format)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 	defer out.Close()

@@ -1,9 +1,14 @@
 package handler
 
-import ("net/http"
-"server/pkg/service")
+import (
+	"net/http"
+	"server/logger"
+	"server/pkg/service"
+)
 
-type Handler struct{
+var Locallog logger.Logger
+
+type Handler struct {
 	services *service.Service
 }
 

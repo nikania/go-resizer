@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"time"
 )
-
 
 func deleteFile(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w, r)
@@ -15,28 +13,28 @@ func deleteFile(w http.ResponseWriter, r *http.Request) {
 
 	err := os.Remove("res/" + filename)
 	if err != nil {
-		fmt.Println(err)
+		Locallog.Error(err)
 		return
 	}
 }
 
 func DeleteLoop() {
-	fmt.Println("entering dlete loop")
+	Locallog.Info("entering dlete loop")
 	for {
-		fmt.Println("entering dlete loop: for")
+		Locallog.Info("entering dlete loop: for")
 
 		time.Sleep(time.Hour * 8)
 		dir, err := os.ReadDir("res/")
 		if err != nil {
-			fmt.Println(err)
+			Locallog.Error(err)
 		}
 		for i := 0; i < len(dir); i++ {
-			fmt.Println(dir[i].Name())
+			Locallog.Info("Deleting ", dir[i].Name())
 			err := os.RemoveAll("res/" + dir[i].Name())
 			if err != nil {
-				fmt.Println(err)
+				Locallog.Error(err)
 			}
 		}
-		fmt.Println("deleted files")
+		Locallog.Info("deleted files")
 	}
 }
