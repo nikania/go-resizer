@@ -19,22 +19,29 @@ func deleteFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteLoop() {
-	Locallog.Info("entering dlete loop")
+	Locallog.Debug("entering delete loop")
 	for {
-		Locallog.Info("entering dlete loop: for")
+		Locallog.Debug("entering delete loop: for")
 
-		time.Sleep(time.Hour * 8)
+		timebefore := time.Now()
+		sleepTime := time.Hour
+		time.Sleep(sleepTime)
 		dir, err := os.ReadDir("res/")
 		if err != nil {
 			Locallog.Error(err)
 		}
 		for i := 0; i < len(dir); i++ {
-			Locallog.Info("Deleting ", dir[i].Name())
-			err := os.RemoveAll("res/" + dir[i].Name())
+			info, err := dir[i].Info()
 			if err != nil {
 				Locallog.Error(err)
 			}
+			if timebefore.Sub(info.ModTime()) > sleepTime {
+				Locallog.Info("Deleting ", dir[i].Name())
+				err := os.RemoveAll("res/" + dir[i].Name())
+				if err != nil {
+					Locallog.Error(err)
+				}
+			}
 		}
-		Locallog.Info("deleted files")
 	}
 }
