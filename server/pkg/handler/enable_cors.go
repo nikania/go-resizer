@@ -14,7 +14,7 @@ func enableCors(w *http.ResponseWriter, r *http.Request) {
 	} else if len(origin) == 0 {
 
 	} else {
-		Locallog.Error(403)
-		(*w).WriteHeader(403)
+		Locallog.Error(http.StatusForbidden, "Forbidden")
+		(*w).WriteHeader(http.StatusForbidden)
 	}
 }

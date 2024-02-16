@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -17,15 +19,20 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w, r)
 	query := r.URL.Query()
 	filename := query.Get("name")
+	Locallog.Info("Resizing image: ", filename)
 
 	width, err := strconv.ParseUint(query.Get("width"), 10, 32)
 	if err != nil {
 		Locallog.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Wrong width: %v", query.Get("width"))
 		return
 	}
 	height, err := strconv.ParseUint(query.Get("height"), 10, 32)
 	if err != nil {
 		Locallog.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Wrong height: %v", query.Get("height"))
 		return
 	}
 	saveRatio := query.Get("save_ratio")
@@ -34,6 +41,8 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 	file, err := os.Open("res/" + filename)
 	if err != nil {
 		Locallog.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "File does not exist, or already processed and deleted\n")
 		return
 	}
 	defer file.Close()
@@ -41,6 +50,7 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 	img, format, err := image.Decode(file)
 	if err != nil {
 		Locallog.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -51,22 +61,39 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 		m = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
 	}
 
-	out, err := os.Create("res/" + name[0] + "resized." + format)
+	filename = name[0] + "resized." + format
+	out, err := os.Create("res/" + filename)
 	if err != nil {
 		Locallog.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer out.Close()
 
 	switch format {
 	case "png":
-		png.Encode(out, m)
+		err = png.Encode(out, m)
 	case "jpeg":
-		jpeg.Encode(out, m, nil)
+		err = jpeg.Encode(out, m, nil)
 	case "gif":
-		gif.Encode(out, m, nil)
+		err = gif.Encode(out, m, nil)
 	default:
-		png.Encode(out, m)
+		err = png.Encode(out, m)
+	}
+	if err != nil {
+		Locallog.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
+	jsonResp, err := json.Marshal(struct {
+		Name string `json:"name"`
+	}{
+		Name: filename,
+	})
+	if err != nil {
+		Locallog.Error(err)
+	}
+
+	fmt.Fprint(w, string(jsonResp))
 }

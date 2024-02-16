@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/gif"
@@ -21,16 +22,20 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 	convertTo := query.Get("to")
 	name := strings.Split(filename, ".")
 	path := "res/" + filename
+	Locallog.Info("Converting image: ", filename, " to ", convertTo, " format")
 
 	allowed := []string{"image/png", "image/jpeg", "image/gif"}
 	if !util.Contains(allowed, convertTo) {
 		Locallog.Error("Unsupported type to convert to")
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
 		Locallog.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "File does not exist, or already processed and deleted\n")
 		return
 	}
 	defer file.Close()
@@ -40,7 +45,8 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 	img, _, err = image.Decode(file)
 	if err != nil {
 		log.Print(err)
-		fmt.Fprintf(w, "Wrong image format\n")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Wrong image format: %v", err)
 		return
 	}
 
@@ -52,6 +58,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		out, err := os.Create(convName)
 		if err != nil {
 			Locallog.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		defer out.Close()
@@ -62,6 +69,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		out, err := os.Create(convName)
 		if err != nil {
 			Locallog.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		defer out.Close()
@@ -72,6 +80,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		out, err := os.Create(convName)
 		if err != nil {
 			Locallog.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		defer out.Close()
@@ -79,6 +88,14 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		gif.Encode(out, img, nil)
 	}
 
-	fmt.Fprintf(w, "Successfully converted File\n")
-	fmt.Fprintf(w, "name %s\n", convName)
+	jsonResp, err := json.Marshal(struct {
+		Name string `json:"name"`
+	}{
+		Name: convName,
+	})
+	if err != nil {
+		Locallog.Error(err)
+	}
+
+	fmt.Fprint(w, string(jsonResp))
 }

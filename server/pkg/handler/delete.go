@@ -10,6 +10,7 @@ func deleteFile(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w, r)
 	query := r.URL.Query()
 	filename := query.Get("name")
+	Locallog.Info("Deleting file: ", filename)
 
 	err := os.Remove("res/" + filename)
 	if err != nil {
