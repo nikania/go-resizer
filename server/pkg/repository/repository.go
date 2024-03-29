@@ -1,10 +1,16 @@
 package repository
 
-import "server/logger"
+import (
+	"database/sql"
+	"server/logger"
+)
 
 var Locallog logger.Logger
 
 type Authorization interface {
+	CreateUser()
+	UserExists()
+	AuthenticateUser()
 }
 
 type Images interface {
@@ -18,6 +24,6 @@ type Repository struct {
 	Documents
 }
 
-func NewRepository() *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{}
 }

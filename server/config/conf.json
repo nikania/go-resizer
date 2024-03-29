@@ -1,3 +1,4 @@
 {
-  "port": "8080"
+  "port": "8080",
+  "postgres_url": "postgres://postgres:123456@localhost:5432/goresizing?sslmode=disable"
 }

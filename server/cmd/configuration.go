@@ -6,7 +6,8 @@ import (
 )
 
 type Configuration struct {
-	Port string `json:"port"`
+	Port        string `json:"port"`
+	PostgresUrl string `json:"postgres_url"`
 }
 
 func ReadConfiguration() (*Configuration, error) {

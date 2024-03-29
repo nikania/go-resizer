@@ -19,8 +19,12 @@ func init() {
 
 func main() {
 	conf, _ := ReadConfiguration()
+	db, err := repository.NewPostgresDb(conf.PostgresUrl)
+	if err != nil {
+		locallog.Error("Error connecting to db", err)
+	}
 
-	repos := repository.NewRepository()
+	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handler := handler.NewHandler(services)
 

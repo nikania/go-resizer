@@ -1,0 +1,4 @@
+{
+  "port": "8080",
+  "postgres_url": "postgres://postgres:postgres@localhost:5432/example?sslmode=disable"
+}
