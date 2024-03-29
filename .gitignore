@@ -2,4 +2,4 @@
 res
 *.exe
 log_*
-*conf.json
+conf.json
