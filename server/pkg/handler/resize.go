@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/gif"
@@ -86,14 +85,5 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonResp, err := json.Marshal(struct {
-		Name string `json:"name"`
-	}{
-		Name: filename,
-	})
-	if err != nil {
-		Locallog.Error(err)
-	}
-
-	fmt.Fprint(w, string(jsonResp))
+	download(w, r, filename)
 }

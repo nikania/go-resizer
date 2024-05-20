@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/gif"
@@ -88,14 +87,5 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		gif.Encode(out, img, nil)
 	}
 
-	jsonResp, err := json.Marshal(struct {
-		Name string `json:"name"`
-	}{
-		Name: convName,
-	})
-	if err != nil {
-		Locallog.Error(err)
-	}
-
-	fmt.Fprint(w, string(jsonResp))
+	download(w, r, convName)
 }

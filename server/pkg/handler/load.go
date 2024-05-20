@@ -15,10 +15,10 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "hello, you're requested %s\n", r.URL.Path)
 }
 
-func download(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w, r)
-	query := r.URL.Query()
-	filename := query.Get("name")
+func download(w http.ResponseWriter, r *http.Request, filename string) {
+	// enableCors(&w, r)
+	// query := r.URL.Query()
+	// filename := query.Get("name")
 	Locallog.Info("Downloading file: ", filename)
 
 	w.Header().Set("Content-Disposition", "attachment; filename="+filename)
