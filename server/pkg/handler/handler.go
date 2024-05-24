@@ -24,6 +24,5 @@ func (h *Handler) Init() {
 	http.HandleFunc("/", handle)
 	http.HandleFunc("/upload", uploadFile)
 	http.HandleFunc("/resize", resizeImage)
-	http.HandleFunc("/delete", deleteFile)
 	http.HandleFunc("/convert", convertImage)
 }

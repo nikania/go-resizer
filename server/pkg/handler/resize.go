@@ -60,8 +60,8 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 		m = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
 	}
 
-	filename = name[0] + "resized." + format
-	out, err := os.Create("res/" + filename)
+	resized := name[0] + "resized." + format
+	out, err := os.Create("res/" + resized)
 	if err != nil {
 		Locallog.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -85,5 +85,7 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	download(w, r, filename)
+	download(w, r, resized)
+	go deleteFile(filename)
+	go deleteFile(resized)
 }

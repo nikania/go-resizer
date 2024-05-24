@@ -1,21 +1,23 @@
 package handler
 
 import (
-	"net/http"
 	"os"
 	"time"
 )
 
-func deleteFile(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w, r)
-	query := r.URL.Query()
-	filename := query.Get("name")
+func deleteFile(filename string) {
+	<-time.After(1 * time.Second)
 	Locallog.Info("Deleting file: ", filename)
 
 	err := os.Remove("res/" + filename)
 	if err != nil {
-		Locallog.Error(err)
-		return
+		Locallog.Warn("Try to delete file in ten seconds ", filename, err)
+		<-time.After(10 * time.Second)
+		err := os.Remove("res/" + filename)
+		if err != nil {
+			Locallog.Error(err)
+			return
+		}
 	}
 }
 

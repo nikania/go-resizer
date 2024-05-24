@@ -53,7 +53,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 
 	switch convertTo {
 	case "image/png":
-		convName = "res/" + name[0] + "conv.png"
+		convName = name[0] + "conv.png"
 		out, err := os.Create(convName)
 		if err != nil {
 			Locallog.Error(err)
@@ -64,7 +64,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 
 		png.Encode(out, img)
 	case "image/jpeg":
-		convName = "res/" + name[0] + "conv.jpeg"
+		convName = name[0] + "conv.jpeg"
 		out, err := os.Create(convName)
 		if err != nil {
 			Locallog.Error(err)
@@ -75,8 +75,8 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 
 		jpeg.Encode(out, img, nil)
 	case "image/gif":
-		convName = "res/" + name[0] + "conv.gif"
-		out, err := os.Create(convName)
+		convName = name[0] + "conv.gif"
+		out, err := os.Create("res/" + convName)
 		if err != nil {
 			Locallog.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -88,4 +88,6 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	download(w, r, convName)
+	go deleteFile(filename)
+	go deleteFile(convName)
 }
