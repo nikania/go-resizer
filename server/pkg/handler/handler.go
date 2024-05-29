@@ -25,4 +25,5 @@ func (h *Handler) Init() {
 	http.HandleFunc("/upload", uploadFile)
 	http.HandleFunc("/resize", resizeImage)
 	http.HandleFunc("/convert", convertImage)
+	http.HandleFunc("/crop", cropImage)
 }
