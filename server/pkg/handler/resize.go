@@ -60,7 +60,7 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 		m = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
 	}
 
-	resized := name[0] + "resized." + format
+	resized := fmt.Sprintf("%sresized%d%d.%s", name[0], width, height, format)
 	out, err := os.Create("res/" + resized)
 	if err != nil {
 		Locallog.Error(err)
