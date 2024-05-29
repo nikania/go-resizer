@@ -19,8 +19,6 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	filename := query.Get("name")
 	convertTo := query.Get("to")
-	name := strings.Split(filename, ".")
-	path := "res/" + filename
 	Locallog.Info("Converting image: ", filename, " to ", convertTo, " format")
 
 	allowed := []string{"image/png", "image/jpeg", "image/gif"}
@@ -29,8 +27,9 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	name := strings.Split(filename, ".")
 
-	file, err := os.Open(path)
+	file, err := os.Open("res/" + filename)
 	if err != nil {
 		Locallog.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -54,7 +53,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 	switch convertTo {
 	case "image/png":
 		convName = name[0] + "conv.png"
-		out, err := os.Create(convName)
+		out, err := os.Create("res/" + convName)
 		if err != nil {
 			Locallog.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -65,7 +64,7 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		png.Encode(out, img)
 	case "image/jpeg":
 		convName = name[0] + "conv.jpeg"
-		out, err := os.Create(convName)
+		out, err := os.Create("res/" + convName)
 		if err != nil {
 			Locallog.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -87,7 +86,11 @@ func convertImage(w http.ResponseWriter, r *http.Request) {
 		gif.Encode(out, img, nil)
 	}
 
+	// exposing Content-Disposition header for client
+	w.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
 	download(w, r, convName)
-	go deleteFile(filename)
+	file.Close()
+
+	deleteFile(filename)
 	go deleteFile(convName)
 }

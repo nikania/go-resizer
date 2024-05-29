@@ -1,11 +1,11 @@
-import { Button, Heading, Input } from "@chakra-ui/react";
+import { Button, Heading } from "@chakra-ui/react";
 import PageLayout from "../layouts/PageLayout";
 import { FormControl, FormLabel, Select } from "@chakra-ui/react";
-import { useState, useContext } from "react";
-import { FileContext, FileProvider } from "../context/FileContext";
+import { useState, useContext, MouseEvent } from "react";
+import { FileContext, FileContextType } from "../context/FileContext";
 
 export default function Convert() {
-  const { name } = useContext(FileContext);
+  const { name } = useContext<FileContextType>(FileContext);
   const [to, setTo] = useState("");
 
   function handleConvert(
@@ -13,27 +13,39 @@ export default function Convert() {
   ): void {
     event.preventDefault();
     fetch(`http://localhost:8080/convert?name=${name}&to=${to}`)
-      .then((resp) => resp.json())
-      .then((data) => console.log(data))
+      .then((resp) => {
+        const contentDisposition =
+          resp.headers.get("Content-Disposition") || "";
+        const filename =
+          contentDisposition.split("filename=")[1] || "defaultFilename.txt";
+
+        return resp.blob().then((blob) => ({ blob, filename }));
+      })
+      .then(({ blob, filename }) => {
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+
+        URL.revokeObjectURL(link.href);
+      })
       .catch((err) => console.log(err));
   }
   return (
-    <FileProvider>
-      <PageLayout>
-        <Heading>Convert image</Heading>
-        <FormControl>
-          <FormLabel>Convert image</FormLabel>
-          <Select
-            placeholder="Convert To"
-            onChange={(e) => setTo(e.target.value)}
-          >
-            <option value="image/jpeg">JPG</option>
-            <option value="image/png">PNG</option>
-            <option value="image/gif">GIF</option>
-          </Select>
-        </FormControl>
-        <Button onClick={handleConvert}>Convert</Button>
-      </PageLayout>
-    </FileProvider>
+    <PageLayout>
+      <Heading>Convert image</Heading>
+      <form onSubmit={handleConvert}>
+        <FormLabel>Convert image</FormLabel>
+        <Select
+          placeholder="Convert To"
+          onChange={(e) => setTo(e.target.value)}
+        >
+          <option value="image/jpeg">JPG</option>
+          <option value="image/png">PNG</option>
+          <option value="image/gif">GIF</option>
+        </Select>
+        <Button type="submit">Convert</Button>
+      </form>
+    </PageLayout>
   );
 }

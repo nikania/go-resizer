@@ -86,6 +86,8 @@ func resizeImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	download(w, r, resized)
-	go deleteFile(filename)
-	go deleteFile(resized)
+	file.Close()
+	out.Close()
+	deleteFile(filename)
+	deleteFile(resized)
 }

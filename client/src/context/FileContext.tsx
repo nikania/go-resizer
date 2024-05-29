@@ -4,13 +4,19 @@ type FileState = {
   name: string;
 };
 
-export const FileContext = createContext({
+export interface FileContextType {
+  name: string;
+  changeName: (name: string) => void;
+}
+
+export const FileContext = createContext<FileContextType>({
   name: "",
+  changeName: () => {},
 });
 
 const fileReducer = (
   state: FileState,
-  action: { type: string; payload: any },
+  action: { type: string; payload: string },
 ) => {
   switch (action.type) {
     case "SET_NAME":

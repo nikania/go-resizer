@@ -1,12 +1,13 @@
 import { ArrowUpIcon } from "@chakra-ui/icons";
 import { Button, Stack } from "@chakra-ui/react";
 import { useContext } from "react";
-import { FileContext } from "../context/FileContext";
+import { FileContextType, FileContext } from "../context/FileContext";
 
 // react component for uploading files on server
 const UploadFile = () => {
-  const { name, changeName } = useContext(FileContext);
-  const handleFileUpload = (e) => {
+  const { name, changeName } = useContext<FileContextType>(FileContext);
+  console.log("🚀 ~ UploadFile ~ name:", name);
+  const handleFileUpload = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fileInput = document.getElementById("file") as HTMLInputElement;
     const formData = new FormData();
@@ -21,14 +22,14 @@ const UploadFile = () => {
         alert("File uploaded successfully");
         return resp.json();
       })
-      .then((data) => {
-        console.log(data);
+      .then((data: { name: string }) => {
+        console.log("🚀 ~ .then ~ data:", data);
         changeName(data.name);
       })
       .catch((err) => console.log(err));
   };
+  console.log("🚀 ~ UploadFile ~ name:", name);
 
-  console.log(name);
   return (
     <>
       <Stack direction="row" spacing={4}>
