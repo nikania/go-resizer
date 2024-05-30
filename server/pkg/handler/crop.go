@@ -7,7 +7,6 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"image/png"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -60,7 +59,7 @@ func cropImage(w http.ResponseWriter, r *http.Request) {
 
 	img, format, err := image.Decode(file)
 	if err != nil {
-		log.Print(err)
+		Locallog.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Wrong image format: %v", err)
 		return
