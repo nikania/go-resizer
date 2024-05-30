@@ -3,12 +3,13 @@ package repository
 import (
 	"database/sql"
 	"server/logger"
+	"server/pkg/model"
 )
 
 var Locallog logger.Logger
 
 type Authorization interface {
-	CreateUser()
+	CreateUser(user model.User) (int, error)
 	UserExists()
 	AuthenticateUser()
 }
@@ -25,5 +26,7 @@ type Repository struct {
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	return &Repository{}
+	return &Repository{
+		Authorization: NewAuthPostgres(db),
+	}
 }
