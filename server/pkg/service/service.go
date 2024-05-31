@@ -10,6 +10,7 @@ var Locallog logger.Logger
 
 type Authorization interface {
 	CreateUser(user model.User) (int, error)
+	GenerateToken(credentials model.LoginCredentials) (string, error)
 }
 
 type Images interface {

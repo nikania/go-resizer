@@ -21,7 +21,6 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Println(user)
 
 	_, err = h.services.Authorization.CreateUser(user)
 	if err != nil {
@@ -36,7 +35,37 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w, r)
-	// query := r.URL.Query()
+	if r.Method != "POST" {
+		http.Error(w, "Method Not Supported", http.StatusMethodNotAllowed)
+		return
+	}
+
+	credentials := model.LoginCredentials{}
+	err := json.NewDecoder(r.Body).Decode(&credentials)
+	if err != nil {
+		Locallog.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.services.Authorization.GenerateToken(credentials)
+	if err != nil {
+		Locallog.Error(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	jsonResp, err := json.Marshal(struct {
+		Token string `json:"token"`
+	}{
+		Token: token,
+	})
+	if err != nil {
+		Locallog.Error(err)
+	}
+
+	fmt.Fprint(w, string(jsonResp))
 }
 
 func (h *Handler) signOut(w http.ResponseWriter, r *http.Request) {

@@ -10,8 +10,9 @@ var Locallog logger.Logger
 
 type Authorization interface {
 	CreateUser(user model.User) (int, error)
-	UserExists()
-	AuthenticateUser()
+	UserExists(user model.User) (bool, error)
+	GetUserByEmail(email string) (model.User, error)
+	GetUserByLogin(login string) (model.User, error)
 }
 
 type Images interface {

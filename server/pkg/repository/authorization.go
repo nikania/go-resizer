@@ -28,6 +28,28 @@ func (r *AuthPostgres) CreateUser(user model.User) (int, error) {
 	return int(id), nil
 }
 
-func (r *AuthPostgres) UserExists() {}
+func (r *AuthPostgres) UserExists(user model.User) (bool, error) {
+	return false, nil
+}
 
-func (r *AuthPostgres) AuthenticateUser() {}
+func (r *AuthPostgres) GetUserByEmail(email string) (model.User, error) {
+	var user model.User
+	err := r.db.QueryRow("SELECT email, login, password_hash FROM users WHERE email = $1", email).Scan(&user.Email, &user.Login, &user.Password)
+	if err != nil {
+		Locallog.Error(err)
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+
+func (r *AuthPostgres) GetUserByLogin(login string) (model.User, error) {
+	var user model.User
+	err := r.db.QueryRow("select email, login, password_hash from users where login=$1", login).Scan(&user.Email, &user.Login, &user.Password)
+	if err != nil {
+		Locallog.Error(err)
+		return model.User{}, err
+	}
+
+	return user, nil
+}
