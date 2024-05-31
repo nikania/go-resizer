@@ -14,18 +14,13 @@ func NewAuthPostgres(db *sql.DB) *AuthPostgres {
 }
 
 func (r *AuthPostgres) CreateUser(user model.User) (int, error) {
-	res, err := r.db.Exec("INSERT INTO users (email, login, password_hash) values ($1, $2, $3)", user.Email, user.Login, user.Password)
+	err := r.db.QueryRow("INSERT INTO users (email, login, password_hash) values ($1, $2, $3) RETURNING id", user.Email, user.Login, user.Password).Scan(&user.Id)
 	if err != nil {
 		Locallog.Error(err)
 		return 0, err
 	}
-	// LastInsertId is not supported by this driver
-	id, err := res.LastInsertId()
-	if err != nil {
-		Locallog.Error(err)
-	}
 
-	return int(id), nil
+	return int(user.Id), nil
 }
 
 func (r *AuthPostgres) UserExists(user model.User) (bool, error) {
@@ -34,7 +29,7 @@ func (r *AuthPostgres) UserExists(user model.User) (bool, error) {
 
 func (r *AuthPostgres) GetUserByEmail(email string) (model.User, error) {
 	var user model.User
-	err := r.db.QueryRow("SELECT email, login, password_hash FROM users WHERE email = $1", email).Scan(&user.Email, &user.Login, &user.Password)
+	err := r.db.QueryRow("SELECT id, email, login, password_hash FROM users WHERE email = $1", email).Scan(&user.Id, &user.Email, &user.Login, &user.Password)
 	if err != nil {
 		Locallog.Error(err)
 		return model.User{}, err
@@ -45,7 +40,18 @@ func (r *AuthPostgres) GetUserByEmail(email string) (model.User, error) {
 
 func (r *AuthPostgres) GetUserByLogin(login string) (model.User, error) {
 	var user model.User
-	err := r.db.QueryRow("select email, login, password_hash from users where login=$1", login).Scan(&user.Email, &user.Login, &user.Password)
+	err := r.db.QueryRow("select id, email, login, password_hash from users where login=$1", login).Scan(&user.Id, &user.Email, &user.Login, &user.Password)
+	if err != nil {
+		Locallog.Error(err)
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+
+func (r *AuthPostgres) GetUserById(id int) (model.User, error) {
+	var user model.User
+	err := r.db.QueryRow("select id, email, login, password_hash from users where id=$1", id).Scan(&user.Id, &user.Email, &user.Login, &user.Password)
 	if err != nil {
 		Locallog.Error(err)
 		return model.User{}, err

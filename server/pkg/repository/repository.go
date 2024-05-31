@@ -13,6 +13,7 @@ type Authorization interface {
 	UserExists(user model.User) (bool, error)
 	GetUserByEmail(email string) (model.User, error)
 	GetUserByLogin(login string) (model.User, error)
+	GetUserById(id int) (model.User, error)
 }
 
 type Images interface {

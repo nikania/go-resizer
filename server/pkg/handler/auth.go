@@ -22,7 +22,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.services.Authorization.CreateUser(user)
+	id, err := h.services.Authorization.CreateUser(user)
 	if err != nil {
 		Locallog.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -30,7 +30,16 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	// fmt.Fprintf(w, "\"id\": %v", id)
+	jsonResp, err := json.Marshal(struct {
+		Id int `json:"id"`
+	}{
+		Id: id,
+	})
+	if err != nil {
+		Locallog.Error(err)
+	}
+
+	fmt.Fprint(w, string(jsonResp))
 }
 
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
