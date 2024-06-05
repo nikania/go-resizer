@@ -81,8 +81,3 @@ func (h *Handler) signOut(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w, r)
 	// query := r.URL.Query()
 }
-
-func (h *Handler) auth(w http.ResponseWriter, r *http.Request) {
-	// check if the user is authenticated
-
-}

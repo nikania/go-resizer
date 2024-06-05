@@ -27,8 +27,8 @@ func (h *Handler) Init() {
 	http.HandleFunc("/convert", convertImage)
 	http.HandleFunc("/crop", cropImage)
 	http.HandleFunc("/compress", compressImage)
-	http.HandleFunc("/auth", h.auth)
 	http.HandleFunc("/signup", h.signUp)
 	http.HandleFunc("/signin", h.signIn)
 	http.HandleFunc("/signout", h.signOut)
+	http.HandleFunc("/chain", h.chain)
 }

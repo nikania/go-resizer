@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"server/pkg/model"
 	"server/pkg/repository"
 	"time"
@@ -11,6 +12,7 @@ import (
 
 const (
 	signingKey = "secret"
+	tokenTTL   = time.Hour * 24
 )
 
 type AuthService struct {
@@ -52,9 +54,12 @@ func (s *AuthService) GenerateToken(credentials model.LoginCredentials) (string,
 
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
-		Subject:   userFromDB.Login,
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &BearerClaims{
+		userFromDB.Id,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
+			IssuedAt:  time.Now().Unix(),
+		},
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
@@ -65,6 +70,30 @@ func (s *AuthService) GenerateToken(credentials model.LoginCredentials) (string,
 	}
 
 	return tokenString, nil
+}
+
+type BearerClaims struct {
+	UserId int
+	jwt.StandardClaims
+}
+
+func (s *AuthService) ParseToken(bearerToken string) (int, error) {
+	token, err := jwt.ParseWithClaims(bearerToken, &BearerClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(signingKey), nil
+	})
+	if err != nil {
+		Locallog.Error(err)
+		return 0, err
+	}
+	claims, ok := token.Claims.(*BearerClaims)
+	if !ok || !token.Valid {
+		return 0, fmt.Errorf("invalid token")
+	}
+	return claims.UserId, nil
 }
 
 func (s *AuthService) CreateSession() {}
